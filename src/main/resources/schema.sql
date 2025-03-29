@@ -51,7 +51,8 @@ CREATE TABLE IF NOT EXISTS cabinet_dr (
     name VARCHAR(255),
     tax_number VARCHAR(255),
     created_at DATE,
-    updated_at DATE
+    updated_at DATE,
+    qr_code VARCHAR(255) UNIQUE NOT NULL -- Added QR code column
 );
 
 -- Assistant table
@@ -90,17 +91,18 @@ CREATE TABLE IF NOT EXISTS patients (
     role VARCHAR(255),
     password VARCHAR(255),
     is_active BOOLEAN,
-    age INTEGER
+    age INTEGER,
+    cabinet_id BIGINT NOT NULL -- Added foreign key to CabinetDr
 );
 
--- Junction table for many-to-many relationship between Cabinet and Patient
-CREATE TABLE IF NOT EXISTS cabinet_patient (
-    cabinet_id BIGINT,
-    patient_id BIGINT,
-    PRIMARY KEY (cabinet_id, patient_id),
-    FOREIGN KEY (cabinet_id) REFERENCES cabinet_dr(id_site),
-    FOREIGN KEY (patient_id) REFERENCES patients(id)
-);
+-- Remove junction table cabinet_patient
+-- CREATE TABLE IF NOT EXISTS cabinet_patient (
+--     cabinet_id BIGINT,
+--     patient_id BIGINT,
+--     PRIMARY KEY (cabinet_id, patient_id),
+--     FOREIGN KEY (cabinet_id) REFERENCES cabinet_dr(id_site),
+--     FOREIGN KEY (patient_id) REFERENCES patients(id)
+-- );
 
 -- Password Reset Token table
 CREATE TABLE IF NOT EXISTS password_reset_token (
@@ -116,7 +118,12 @@ ADD CONSTRAINT fk_doctor_cabinet
 FOREIGN KEY (cabinet_id) REFERENCES cabinet_dr(id_site);
 
 ALTER TABLE assistants 
-ADD CONSTRAINT fk_assistant_cabinet 
+ADD CONSTRAINT fk_assistant_cabinet
+FOREIGN KEY (cabinet_id) REFERENCES cabinet_dr(id_site);
+
+-- Add foreign key constraint for Patient to CabinetDr
+ALTER TABLE patients
+ADD CONSTRAINT fk_patient_cabinet
 FOREIGN KEY (cabinet_id) REFERENCES cabinet_dr(id_site);
 
 -- Note: The password_reset_token table has a user_id column that should reference a user,

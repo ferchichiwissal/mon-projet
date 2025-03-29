@@ -2,6 +2,7 @@ package pi.pperformance.elite.entities;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.UUID; // For generating unique identifiers for QR code
 import jakarta.persistence.*;
 
 @Entity
@@ -24,18 +25,25 @@ public class CabinetDr {
     @OneToMany(mappedBy = "cabinet", cascade = CascadeType.ALL)
     private List<Assistant> assistants;
 
-    @ManyToMany
-    @JoinTable(
-      name = "cabinet_patient", 
-      joinColumns = @JoinColumn(name = "cabinet_id"), 
-      inverseJoinColumns = @JoinColumn(name = "patient_id")
-    )
-    private List<Patient> patients;
+    // Remove ManyToMany relationship with Patient
+    // @ManyToMany
+    // @JoinTable(
+    //   name = "cabinet_patient", 
+    //   joinColumns = @JoinColumn(name = "cabinet_id"), 
+    //   inverseJoinColumns = @JoinColumn(name = "patient_id")
+    // )
+    // private List<Patient> patients;
+
+    @Column(unique = true, nullable = false)
+    private String qrCode; // Store the unique QR code identifier
 
     // Constructeurs
-    public CabinetDr() {}
+    public CabinetDr() {
+        this.qrCode = UUID.randomUUID().toString(); // Generate unique QR code on creation
+    }
 
     public CabinetDr(Long idSite, String address, String fax, String tel, String name, String taxNumber, Date createdAt, Date updatedAt) {
+        this(); // Call the default constructor to generate QR code
         this.idSite = idSite;
         this.address = address;
         this.fax = fax;
@@ -77,6 +85,10 @@ public class CabinetDr {
     public List<Assistant> getAssistants() { return assistants; }
     public void setAssistants(List<Assistant> assistants) { this.assistants = assistants; }
 
-    public List<Patient> getPatients() { return patients; }
-    public void setPatients(List<Patient> patients) { this.patients = patients; }
+    // Remove Patient list getters/setters
+    // public List<Patient> getPatients() { return patients; }
+    // public void setPatients(List<Patient> patients) { this.patients = patients; }
+
+    public String getQrCode() { return qrCode; }
+    // QR code should be immutable after creation, so no setter
 }
